@@ -135,4 +135,5 @@ while not grid.IsGameOver():
             valid = True
     print("\n")     
     playermove *= -1
+    sleep(0.5)
 print(f"{str(grid)}\n{("No player","X","O")[grid.value]} wins.")
