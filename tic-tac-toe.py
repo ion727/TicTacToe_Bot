@@ -102,8 +102,11 @@ class State:
             raise ValueError("Invalid move: unable to find move in calculated list.")
         return PlayedMove
 
-
-grid = State()
+start = [[" "," "," "],
+         [" "," "," "],
+         [" "," "," "]]
+start[randint(0,2)][randint(0,2)] = "X"
+grid = State(start)
 grid.calculate()
 playermove = grid.playermove
 spaces = 2
