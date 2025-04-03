@@ -102,38 +102,51 @@ class State:
             raise ValueError("Invalid move: unable to find move in calculated list.")
         return PlayedMove
 
-Xwins = State([[" ", " ", " "],
-               [" ", " ", " "],
-               [" ", " ", " "]])
-#Xwins.calculate()
-#print(Xwins.value,"\n\n+\n+\n+\n+\n+\n")
 
-
-grid = Xwins
+grid = State()
 grid.calculate()
-end = False
 playermove = grid.playermove
-print(end="\n\n")
+spaces = 2
+print("\n")
+# game loop
 while not grid.IsGameOver():
     print(str(grid))
     print(f"\r\x1b[6A",end = "")
-    valid = False
-    while not valid:
-        if playermove == -1:
-            move = input("Enter a move (Format: XY):   \x1b[2D")
-            print("\x1b[1A",end="")   
-            x,y = int(move[0]) - 1, int(move[1]) - 1
+    if playermove == -1:
+        # Loop till valid move inputted
+
+        while True:
+            move = input(f"Enter a move (Format: XY): {" "*spaces+"\x1b[1D"*spaces}")
+            spaces = len(move)
+            try:
+                x,y = int(move[0]) - 1, int(move[1]) - 1
+            except:
+                print("Invalid input. Please try again.\r\x1b[2A")
+                continue
+            else:
+                print(" "*32+"\r\x1b[1A",end="")
             if grid.grid[y][x] == " ":
                 grid.grid[y][x] = "O"
                 grid = grid.FindMove()
-                valid = True
+                break
             else: 
                 print("\x1b[1BInvalid Move. Please try again.\r\x1b[1A",end="")
-                continue
-        else:
-            grid = grid.bestmove
-            valid = True
-    print("\n")     
+    else:
+        grid = grid.bestmove
+    print("\n") 
     playermove *= -1
     sleep(0.5)
+
+for i in range(3):
+    if grid.grid[i][0] == grid.grid[i][1] == grid.grid[i][2] != " ":
+        grid.grid[i][0] = grid.grid[i][1] = grid.grid[i][2] = "█"
+    if grid.grid[0][i] == grid.grid[1][i] == grid.grid[2][i] != " ":
+        grid.grid[0][i] = grid.grid[1][i] = grid.grid[2][i] = "█"
+if grid.grid[0][0] == grid.grid[1][1] == grid.grid[2][2] != " ":
+    grid.grid[0][0] = grid.grid[1][1] = grid.grid[2][2] = "█"
+if grid.grid[0][2] == grid.grid[1][1] == grid.grid[2][0] != " ":
+    grid.grid[0][2] = grid.grid[1][1] = grid.grid[2][0] = "█"
 print(f"{str(grid)}\n{("No player","X","O")[grid.value]} wins.")
+
+
+#█
