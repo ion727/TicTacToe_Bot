@@ -74,16 +74,7 @@ class State:
                     new.failsafe = self.failsafe + 1
                     new.grid[y][x] = "X" if self.playermove == 1 else "O"
                     new.playermove = self.playermove * -1 # other player's turn.
-                    
-                    # break out of calculate() when a winning move is found
-                    new.value = new.getStateValue()
-                    if new.value == self.playermove:
-                        self.moves.append(new)
-                        self.bestmove = new
-                        self.value = new.value
-                        #print(f"win for {("","X","O")[self.value]}:\n"+str(self),"\n\n")
-                        #return self.value
-                    
+                    new.value = new.getStateValue()                  
                     self.moves.append(new) 
         
         values = [state.calculate() for state in self.moves]
