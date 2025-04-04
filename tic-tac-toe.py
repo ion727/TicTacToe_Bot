@@ -21,8 +21,9 @@ class State:
         self.value = self.getStateValue()
         self.failsafe = sum([1 for row in self.grid for square in row if square != " "]) # to ensure infinite looping is impossible
         self.moves = []
-        self.parent = None
+        self.WinningFinalStates = 0
         self.bestmove = None
+
         # calculate who's move it is by counting the number of Xs and Os.
         self.playermove = 1 if sum([1 for row in self.grid for square in row if square == "X"]) <= sum([1 for row in self.grid for square in row if square == "O"]) else -1
         #print("Value:",self.value)
@@ -70,16 +71,19 @@ class State:
                 if square == " ":
                     #print(self.failsafe, self.iteration,"is valid.")
                     new = State(self.grid)
-                    new.parent = self
                     new.failsafe = self.failsafe + 1
                     new.grid[y][x] = "X" if self.playermove == 1 else "O"
                     new.playermove = self.playermove * -1 # other player's turn.
-                    new.value = new.getStateValue()                  
+                    new.value = new.getStateValue()               
                     self.moves.append(new) 
         
         values = [state.calculate() for state in self.moves]
+        self.WinningFinalStates += sum(move.WinningFinalStates for move in self.moves)
         self.move_and_value = list(zip(self.moves, values))
-        self.move_and_value.sort(key=lambda x: x[1],reverse=self.playermove==1)
+        # add a tiebreaking weight to "value" to favour moves which set up for a win.
+        self.WinningFinalStates += sum(move.value for move in (pair[0] for pair in self.move_and_value) if move.value * self.playermove >= 1)
+        # sort first based on value (x[1]) and then descending based on the tiebreaker (-x[0].WinningFinalStates)
+        self.move_and_value.sort(key=lambda x: (x[0].value,-x[0].WinningFinalStates),reverse=self.playermove==1)
         self.bestmove, self.value = self.move_and_value[0]
         return self.value
     def IsGameOver(self):
@@ -97,6 +101,7 @@ class State:
         return PlayedMove
 
 
+
 def main():
     start = [[" "," "," "],
             [" "," "," "],
@@ -105,7 +110,7 @@ def main():
     grid = State(start)
     grid.calculate()
     playermove = grid.playermove
-    spaces = 2
+    spaces = 2 # Spacing for formatting
     print(f"Ready!{' '*30}\n")
     sleep(0.5)
     # game loop
