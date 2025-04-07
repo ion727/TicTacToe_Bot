@@ -8,7 +8,11 @@ from random import randint
 
 
 class State:
-    StatesExplored = 0
+    TotalStatesExplored = 0
+    # Create a set to ensure no duplicate values are stored 
+    StatesExploredID = []
+    StatesExplored = []
+
     def __init__(self, *args):
         if len(args) == 1:
             args = args[0]
@@ -23,6 +27,7 @@ class State:
         self.moves = []
         self.WinningFinalStates = 0
         self.bestmove = None
+        self.ID = None
 
         # calculate who's move it is by counting the number of Xs and Os.
         self.playermove = 1 if sum([1 for row in self.grid for square in row if square == "X"]) <= sum([1 for row in self.grid for square in row if square == "O"]) else -1
@@ -48,19 +53,28 @@ class State:
             value = MatchValue(self.grid[0][2])
         return value
     def calculate(self):
-        print(f"Moves Analysed: {State.StatesExplored}\r", end="")
-        State.StatesExplored += 1
-        # break out if game is over
-        if self.value != 0:
-            #print(str(self), self.value, "\n")
+        # Ensure this move has not already been checked.
+        #print(State.StatesExploredID)
+        if self.GenerateID() in State.StatesExploredID:
+            Location = State.StatesExploredID.index(self.ID)
+            self.value = State.StatesExplored[Location].value
+            self.bestmove = State.StatesExplored[Location].bestmove
+            self.WinningFinalStates = State.StatesExplored[Location].WinningFinalStates
             return self.value
-
+        else:
+            State.StatesExploredID.append(self.ID)
+            State.StatesExplored.append(self)
+        
         # recursively scan every possible move until all ends are found,
-        # then minmax the values 
-        if self.IsGameOver():
-            self.value = self.getStateValue()
-            #print(str(self), self.value, "\n")
+        # find best move
+        print(f"Moves Analysed: {State.TotalStatesExplored}\r", end="")
+        State.TotalStatesExplored += 1
+        
+        # break out if game is over
+        if self.value != 0 or self.IsGameOver():
             return self.value
+        
+        # Prevent infinite looping
         if self.failsafe > 9:
             raise Exception("Somewhere be loopin too much cuz we got more than 9 layers.\nHeres the state:" + str(self))
         # find each empty square and create a new state associated to it
@@ -76,15 +90,20 @@ class State:
                     new.playermove = self.playermove * -1 # other player's turn.
                     new.value = new.getStateValue()               
                     self.moves.append(new) 
-        
+        if len(self.moves) == 0:
+            return self.getStateValue()
+        # Find value of all child moves
         values = [state.calculate() for state in self.moves]
+        
+        # add a tiebreaking weight to favour moves which set up for a win.
         self.WinningFinalStates += sum(move.WinningFinalStates for move in self.moves)
         self.move_and_value = list(zip(self.moves, values))
-        # add a tiebreaking weight to "value" to favour moves which set up for a win.
         self.WinningFinalStates += sum(move.value for move in (pair[0] for pair in self.move_and_value) if move.value * self.playermove >= 1)
-        # sort first based on value (x[1]) and then descending based on the tiebreaker (-x[0].WinningFinalStates)
+        # sort first based on value (x[0].value) and then descending based on the tiebreaker (-x[0].WinningFinalStates)
         self.move_and_value.sort(key=lambda x: (x[0].value,-x[0].WinningFinalStates),reverse=self.playermove==1)
+        # Select best move and best and use obtain its value.
         self.bestmove, self.value = self.move_and_value[0]
+        del self.move_and_value
         return self.value
     def IsGameOver(self):
         gridfilled = all(square != " " for row in self.grid for square in row)
@@ -99,8 +118,9 @@ class State:
         if PlayedMove == None:
             raise ValueError("Invalid move: unable to find move in calculated list.")
         return PlayedMove
-
-
+    def GenerateID(self):
+        self.ID = "".join("".join([square for square in row]) for row in self.grid)
+        return self.ID
 
 def main():
     start = [[" "," "," "],
