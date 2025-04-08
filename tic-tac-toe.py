@@ -57,7 +57,7 @@ class State:
         # Ensure this move has not already been checked.
         if self.GenerateID() in State.StatesExploredID:
             Location = State.StatesExploredID.index(self.ID)
-            self.__dict__ = State.StatesExplored[Location].__dict__.copy()
+            self.__dict__ = State.StatesExplored[Location].__dict__
             return self.value
         else:
             State.StatesExploredID.append(self.ID)
