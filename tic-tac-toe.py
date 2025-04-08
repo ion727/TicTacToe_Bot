@@ -4,7 +4,7 @@ X will move first.
 '''
 from time import sleep
 from copy import deepcopy
-from random import randint
+from random import randint, choice
 
 
 class State:
@@ -13,7 +13,7 @@ class State:
     StatesExploredID = []
     StatesExplored = []
 
-    def __init__(self, *args):
+    def __init__(self, *args, playermove = 1):
         if len(args) == 1:
             args = args[0]
         if len(args) == 9:
@@ -28,12 +28,12 @@ class State:
         self.WinningFinalStates = 0
         self.bestmove = None
         self.ID = None
+        self.GenerateID()
 
         # calculate who's move it is by counting the number of Xs and Os.
-        self.playermove = 1 if sum([1 for row in self.grid for square in row if square == "X"]) <= sum([1 for row in self.grid for square in row if square == "O"]) else -1
-        #print("Value:",self.value)
+        self.playermove = playermove if sum([1 for row in self.grid for square in row if square == "X"]) <= sum([1 for row in self.grid for square in row if square == "O"]) else -1*playermove
     def __str__(self):
-        return "\n".join([" ".join("".join([f"[{square}]"for square in row])) for row in self.grid])+"\n"
+        return "\n".join([" ".join("".join(["[{}]".format(square) for square in row])) for row in self.grid])+"\n"
     def getStateValue(self):
         value = 0
         def MatchValue(square):
@@ -54,12 +54,9 @@ class State:
         return value
     def calculate(self):
         # Ensure this move has not already been checked.
-        #print(State.StatesExploredID)
         if self.GenerateID() in State.StatesExploredID:
             Location = State.StatesExploredID.index(self.ID)
-            self.value = State.StatesExplored[Location].value
-            self.bestmove = State.StatesExplored[Location].bestmove
-            self.WinningFinalStates = State.StatesExplored[Location].WinningFinalStates
+            self.__dict__ = State.StatesExplored[Location].__dict__.copy()
             return self.value
         else:
             State.StatesExploredID.append(self.ID)
@@ -67,7 +64,7 @@ class State:
         
         # recursively scan every possible move until all ends are found,
         # find best move
-        print(f"Moves Analysed: {State.TotalStatesExplored}\r", end="")
+        print("Moves Analysed: {}\r".format(State.TotalStatesExplored), end="")
         State.TotalStatesExplored += 1
         
         # break out if game is over
@@ -78,10 +75,8 @@ class State:
         if self.failsafe > 9:
             raise Exception("Somewhere be loopin too much cuz we got more than 9 layers.\nHeres the state:" + str(self))
         # find each empty square and create a new state associated to it
-        #self.iteration = 0
         for y, row in enumerate(self.grid):
             for x, square in enumerate(row):
-                #self.iteration += 1
                 if square == " ":
                     #print(self.failsafe, self.iteration,"is valid.")
                     new = State(self.grid)
@@ -113,35 +108,39 @@ class State:
         # Can only be used after changing a square in self.grid .
         # Returns the calculated state that corresponds with 
         # the player's move
-        PlayedMove = next(move for move in self.moves if move.grid == self.grid)
-        #print("\n\n\n\nBot's best move:\n"+str(PlayedMove.bestmove))
-        if PlayedMove == None:
+        try:
+            PlayedMove = next(move for move in self.moves if move.grid == self.grid)
+            return PlayedMove
+        except StopIteration:
             raise ValueError("Invalid move: unable to find move in calculated list.")
-        return PlayedMove
     def GenerateID(self):
         self.ID = "".join("".join([square for square in row]) for row in self.grid)
         return self.ID
+
+# ======================================================================================================== #
 
 def main():
     start = [[" "," "," "],
             [" "," "," "],
             [" "," "," "]]
-    start[randint(0,2)][randint(0,2)] = "X"
-    grid = State(start)
+    playermove = 1#choice([-1,1])
+    if playermove == 1:
+        start[randint(0,2)][randint(0,2)] = "X"
+    grid = State(start, playermove=playermove)
     grid.calculate()
-    playermove = grid.playermove
+    
+    playermove *= -1 # Player 2's turn
     spaces = 2 # Spacing for formatting
-    print(f"Ready!{' '*30}\n")
+    print("Ready!{}\n".format(' '*30))
     sleep(0.5)
     # game loop
     while not grid.IsGameOver():
         print(str(grid))
-        print(f"\r\x1b[6A",end = "")
+        print("\r\x1b[6A",end = "")
         if playermove == -1:
             # Loop till valid move inputted
-
             while True:
-                move = input(f"Enter a move (Format: XY): {" "*spaces+"\x1b[1D"*spaces}")
+                move = input("Enter a move (Format: XY): {}".format(' '*spaces+'\x1b[1D'*spaces))
                 spaces = len(move)
                 try:
                     x,y = int(move[0]) - 1, int(move[1]) - 1
@@ -171,6 +170,6 @@ def main():
         grid.grid[0][0] = grid.grid[1][1] = grid.grid[2][2] = "█"
     if grid.grid[0][2] == grid.grid[1][1] == grid.grid[2][0] != " ":
         grid.grid[0][2] = grid.grid[1][1] = grid.grid[2][0] = "█"
-    print(f"{str(grid)}\n{("No player","X","O")[grid.value]} wins.")
+    print("{}\n{} wins.".format(str(grid),("No player","X","O")[grid.value]))
 if __name__ == "__main__":
     main()
