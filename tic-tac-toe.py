@@ -6,7 +6,8 @@ from time import sleep
 from copy import deepcopy
 from random import randint, choice
 
-
+class TerminateProgram(Exception): pass
+    
 class State:
     TotalStatesExplored = 0
     # Create a set to ensure no duplicate values are stored 
@@ -140,6 +141,8 @@ def main():
             # Loop till valid move inputted
             while True:
                 move = input("Enter a move (Format: XY): {}".format(' '*spaces+'\x1b[1D'*spaces))
+                if move == "end":
+                    raise TerminateProgram()
                 spaces = len(move)
                 try:
                     x,y = int(move[0]) - 1, int(move[1]) - 1
@@ -171,4 +174,12 @@ def main():
         grid.grid[0][2] = grid.grid[1][1] = grid.grid[2][0] = "█"
     print("{}\n{} wins.".format(str(grid),("No player","X","O")[grid.value]))
 if __name__ == "__main__":
-    main()
+    while True:
+        try:
+            main()
+        except KeyboardInterrupt:
+            print(end=57*" " + "\r")
+            continue
+        except TerminateProgram:
+            print(end="\x1b[1A")
+            break
