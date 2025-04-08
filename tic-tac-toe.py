@@ -121,18 +121,17 @@ class State:
 
 def main():
     start = [[" "," "," "],
-            [" "," "," "],
-            [" "," "," "]]
-    playermove = 1#choice([-1,1])
+             [" "," "," "],
+             [" "," "," "]]
+    playermove = choice([-1,1])
     if playermove == 1:
         start[randint(0,2)][randint(0,2)] = "X"
     grid = State(start, playermove=playermove)
     grid.calculate()
-    
-    playermove *= -1 # Player 2's turn
-    spaces = 2 # Spacing for formatting
     print("Ready!{}\n".format(' '*30))
     sleep(0.5)
+    playermove = -1
+    spaces = 2 # Spacing for formatting
     # game loop
     while not grid.IsGameOver():
         print(str(grid))
