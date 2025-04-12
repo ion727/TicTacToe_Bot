@@ -23,16 +23,16 @@ class State:
             self.grid = deepcopy(args)
         else:
             self.grid = [[" " for _ in range(3)] for _ in range(3)]
-        self.value = self.getStateValue()
-        self.failsafe = sum([1 for row in self.grid for square in row if square != " "]) # to ensure infinite looping is impossible
+        self.value = 0
+        self.failsafe = 0 # to ensure infinite looping is impossible
         self.moves = []
         self.WinningFinalStates = 0
         self.bestmove = None
         self.ID = None
-        self.GenerateID()
 
         # calculate who's move it is by counting the number of Xs and Os.
-        self.playermove = playermove if sum([1 for row in self.grid for square in row if square == "X"]) <= sum([1 for row in self.grid for square in row if square == "O"]) else -1*playermove
+        self.playermove = playermove
+        
     def __str__(self):
         return "\n".join([" ".join("".join(["[{}]".format(square) for square in row])) for row in self.grid])+"\n"
     def getStateValue(self):
@@ -83,8 +83,9 @@ class State:
                     new = State(self.grid)
                     new.failsafe = self.failsafe + 1
                     new.grid[y][x] = "X" if self.playermove == 1 else "O"
-                    new.playermove = self.playermove * -1 # other player's turn.
-                    new.value = new.getStateValue()               
+                    new.playermove=self.playermove*-1
+                    new.value = new.getStateValue() 
+                    new.GenerateID()              
                     self.moves.append(new) 
         if len(self.moves) == 0:
             return self.getStateValue()
@@ -132,7 +133,7 @@ def main(playermove):
              [" "," "," "]]
     if playermove == 1:
         start[randint(0,2)][randint(0,2)] = "X"
-    grid = State(start, playermove=playermove)
+    grid = State(start, playermove=-1)
     grid.calculate()
     print("Ready!{}\n".format(' '*30))
     sleep(0.5)
