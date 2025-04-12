@@ -10,7 +10,7 @@ class TerminateProgram(Exception): pass
     
 class State:
     TotalStatesExplored = 0
-    # Create a set to ensure no duplicate values are stored 
+    # Create a cache to ensure no duplicate values are stored 
     StatesExploredID = []
     StatesExplored = []
 
@@ -117,6 +117,10 @@ class State:
     def GenerateID(self):
         self.ID = "".join("".join([square for square in row]) for row in self.grid)
         return self.ID
+    def ResetCache():
+        State.TotalStatesExplored = 0
+        State.StatesExploredID = []
+        State.StatesExplored = []
 
 # ======================================================================================================== #
 
@@ -192,6 +196,7 @@ if __name__ == "__main__":
     while True:
         try:
             returned = main(playermove)
+            State.ResetCache()
         except KeyboardInterrupt:
             print(end=57*" " + "\r")
             continue
@@ -201,13 +206,13 @@ if __name__ == "__main__":
         if returned != 0:
             print("An unexpected error occured. Logging...")
             with open("ErrorLogs.txt", "a") as fp:
-                fp.write("{}\nBot was unsuccessful in calculating the following move:\n{}\nPlayermove: {}\nFound in cache? {}\nCalculated moves:".format(asctime(localtime()),str(returned),returned.playermove,returned.ID in State.StatesExploredID))
+                fp.write("{}\nBot was unsuccessful in calculating the following move:\n{}\nPlayermove: {}\nFound in cache? {}\nCalculated moves:".format(asctime(localtime()),str(returned),returned.playermove,returned.GenerateID() in State.StatesExploredID))
                 fp.writelines(["\n\n" + str(move) for move in returned.moves])
                 fp.write("="*60+"\n")
             for i in range(3):
                 print("Logging successful. Exiting in {}...".format(3-i), end="\n\x1b[1A")
                 sleep(1)
-            print(end="\r")
+            print(end="\r\x1b[1A")
             quit()
         else:
             playermove *= -1
