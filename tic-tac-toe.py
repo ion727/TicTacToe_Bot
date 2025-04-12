@@ -2,7 +2,7 @@
 arbitraty decisions: the bot will play X, the player will play O. X will be considered 1 and O will be -1.
 X will move first.
 '''
-from time import sleep
+from time import sleep, asctime, localtime
 from copy import deepcopy
 from random import randint, choice
 
@@ -120,11 +120,12 @@ class State:
 
 # ======================================================================================================== #
 
-def main():
+def main(playermove):
+    if playermove not in (1,-1):
+        raise ValueError("main() takes one positional argument")
     start = [[" "," "," "],
              [" "," "," "],
              [" "," "," "]]
-    playermove = choice([-1,1])
     if playermove == 1:
         start[randint(0,2)][randint(0,2)] = "X"
     grid = State(start, playermove=playermove)
@@ -135,8 +136,7 @@ def main():
     spaces = 2 # Spacing for formatting
     # game loop
     while not grid.IsGameOver():
-        print(str(grid))
-        print("\r\x1b[6A",end = "")
+        print(str(grid), end="\r\x1b[5A")
         if playermove == -1:
             # Loop till valid move inputted
             while True:
@@ -153,10 +153,13 @@ def main():
                     print(" "*32+"\r\x1b[1A",end="")
                 if grid.grid[y][x] == " ":
                     grid.grid[y][x] = "O"
-                    grid = grid.FindMove()
+                    try:
+                        grid = grid.FindMove()
+                    except ValueError:
+                        return (grid)
                     break
                 else: 
-                    print("\x1b[1BInvalid Move. Please try again.\r\x1b[1A",end="")
+                    print("\x1b[1BInvalid move. Please try again.\r\x1b[1A",end="")
         else:
             grid = grid.bestmove
         print("\n") 
@@ -173,13 +176,29 @@ def main():
     if grid.grid[0][2] == grid.grid[1][1] == grid.grid[2][0] != " ":
         grid.grid[0][2] = grid.grid[1][1] = grid.grid[2][0] = "█"
     print("{}\n{} wins.".format(str(grid),("No player","X","O")[grid.value]))
+    sleep(1)
+    return 0
 if __name__ == "__main__":
+    playermove = 1
     while True:
         try:
-            main()
+            returned = main(playermove)
         except KeyboardInterrupt:
             print(end=57*" " + "\r")
             continue
         except TerminateProgram:
             print(end="\x1b[1A")
             break
+        if returned != 0:
+            print("An unexpected error occured. Logging...")
+            with open("ErrorLogs.txt", "a") as fp:
+                fp.write("{}\nBot was unsuccessful in calculating the following move:\n{}\nPlayermove: {}\nFound in cache? {}\nCalculated moves:".format(asctime(localtime()),str(returned),returned.playermove,returned.ID in State.StatesExploredID))
+                fp.writelines(["\n\n" + str(move) for move in returned.moves])
+                fp.write("="*60+"\n")
+            for i in range(3):
+                print("Logging successful. Exiting in {}...".format(3-i), end="\n\x1b[1A")
+                sleep(1)
+            print(end="\r")
+            quit()
+        else:
+            playermove *= -1
