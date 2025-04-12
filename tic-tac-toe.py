@@ -140,23 +140,32 @@ def main(playermove):
         if playermove == -1:
             # Loop till valid move inputted
             while True:
-                move = input("Enter a move (Format: XY): {}".format(' '*spaces+'\x1b[1D'*spaces))
+                move = input("Enter a move (Format: X;Y): {}".format(' '*spaces+'\x1b[1D'*spaces))
                 if move == "end":
                     raise TerminateProgram()
-                spaces = len(move)
+                spaces = len(move)     
+                # validation 
                 try:
+                    if len(move) != 3 or (len(move) > 1 and move[1] != ";"):
+                        raise IndexError()
+                    move = move.split(";")
                     x,y = int(move[0]) - 1, int(move[1]) - 1
-                except:
-                    print("Invalid input. Please try again.\r\x1b[2A")
+                    if not (-1 < x < 3 and -1 < y < 3):
+                        raise ValueError()
+                except ValueError:
+                    print("Invalid input. Please try again.                                         \r\x1b[2A")
+                    continue
+                except IndexError:
+                    print("Invalid input. Ensure correct formatting X;Y e.g. 3;2 for column 3 row 2.\r\x1b[2A")
                     continue
                 else:
-                    print(" "*32+"\r\x1b[1A",end="")
+                    print(" "*73+"\r\x1b[1A",end="")
                 if grid.grid[y][x] == " ":
                     grid.grid[y][x] = "O"
                     try:
                         grid = grid.FindMove()
                     except ValueError:
-                        return (grid)
+                        return grid
                     break
                 else: 
                     print("\x1b[1BInvalid move. Please try again.\r\x1b[1A",end="")
