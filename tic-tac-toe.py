@@ -97,7 +97,7 @@ class State:
         self.WinningFinalStates += sum(move.value for move in (pair[0] for pair in self.move_and_value) if move.value * self.playermove >= 1)
         # sort first based on value (x[0].value) and then descending based on the tiebreaker (-x[0].WinningFinalStates)
         self.move_and_value.sort(key=lambda x: (x[0].value,-x[0].WinningFinalStates),reverse=self.playermove==1)
-        # Select best move and best and use obtain its value.
+        # Unpack best move/value pair
         self.bestmove, self.value = self.move_and_value[0]
         del self.move_and_value
         return self.value
@@ -160,7 +160,7 @@ def main(playermove):
                     print("Invalid input. Please try again.                                         \r\x1b[2A")
                     continue
                 except IndexError:
-                    print("Invalid input. Ensure correct formatting X;Y e.g. 3;2 for column 3 row 2.\r\x1b[2A")
+                    print("Invalid input format. Example: 3;2 for column 3 row 2.\r\x1b[2A")
                     continue
                 else:
                     print(" "*73+"\r\x1b[1A",end="")
