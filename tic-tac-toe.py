@@ -24,7 +24,7 @@ class State:
         else:
             self.grid = [[" " for _ in range(3)] for _ in range(3)]
         self.value = 0
-        self.failsafe = 0 # to ensure infinite looping is impossible
+        self.failsafe = 1 # to ensure infinite looping is impossible
         self.moves = []
         self.WinningFinalStates = 0
         self.bestmove = None
@@ -74,12 +74,11 @@ class State:
         
         # Prevent infinite looping
         if self.failsafe > 9:
-            raise Exception("Somewhere be loopin too much cuz we got more than 9 layers.\nHeres the state:" + str(self))
+            raise Exception("Somewhere be loopin too much cuz we got more than 9 layers.\nHeres the state:\n" + str(self))
         # find each empty square and create a new state associated to it
         for y, row in enumerate(self.grid):
             for x, square in enumerate(row):
                 if square == " ":
-                    #print(self.failsafe, self.iteration,"is valid.")
                     new = State(self.grid)
                     new.failsafe = self.failsafe + 1
                     new.grid[y][x] = "X" if self.playermove == 1 else "O"
@@ -124,10 +123,14 @@ class State:
         State.StatesExplored = []
 
 # ======================================================================================================== #
+# ======================================================================================================== #
+# ======================================================================================================== #
+# ======================================================================================================== #
+# ======================================================================================================== #
 
 def main(playermove):
     if playermove not in (1,-1):
-        raise ValueError("main() takes one positional argument")
+        raise ValueError("main() takes one positional argument; playermove must be 1 or -1")
     start = [[" "," "," "],
              [" "," "," "],
              [" "," "," "]]
@@ -191,7 +194,16 @@ def main(playermove):
         grid.grid[0][2] = grid.grid[1][1] = grid.grid[2][0] = "█"
     print("{}\n{} wins.".format(str(grid),("No player","X","O")[grid.value]))
     sleep(1)
+    print("\x1b[7A" + (" "*54+"\n")*7 + "\x1b[8A")
     return 0
+
+# ======================================================================================================== #
+# ======================================================================================================== #
+# ======================================================================================================== #
+# ======================================================================================================== #
+# ======================================================================================================== #
+
+
 if __name__ == "__main__":
     playermove = 1
     while True:
@@ -199,7 +211,9 @@ if __name__ == "__main__":
             returned = main(playermove)
             State.ResetCache()
         except KeyboardInterrupt:
-            print(end=57*" " + "\r")
+            print(end="\r"+57*" " + "\r")
+            playermove *= -1
+            State.ResetCache()
             continue
         except TerminateProgram:
             print(end="\x1b[1A")
