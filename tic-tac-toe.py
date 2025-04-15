@@ -14,7 +14,7 @@ class State:
     StatesExploredID = []
     StatesExplored = []
 
-    def __init__(self, *args, playermove = 1):
+    def __init__(self, *args, FirstMove = 1, failsafe = 0):
         if len(args) == 1:
             args = args[0]
         if len(args) == 9:
@@ -23,16 +23,19 @@ class State:
             self.grid = deepcopy(args)
         else:
             self.grid = [[" " for _ in range(3)] for _ in range(3)]
+        self.failsafe = failsafe # to ensure infinite looping is impossible
+        # Prevent infinite looping by checking the failsafe when a new state is created
+        if self.failsafe > 9:
+            raise Exception("Somewhere be loopin too much cuz we got more than 9 layers.\nHeres the state:\n" + str(self))
         self.value = 0
-        self.failsafe = 1 # to ensure infinite looping is impossible
         self.moves = []
         self.WinningFinalStates = 0
         self.bestmove = None
         self.ID = None
+        self.GenerateID()
 
         # calculate who's move it is by counting the number of Xs and Os.
-        self.playermove = playermove
-        
+        self.playermove = FirstMove      
     def __str__(self):
         return "\n".join([" ".join("".join(["[{}]".format(square) for square in row])) for row in self.grid])+"\n"
     def getStateValue(self):
@@ -46,8 +49,10 @@ class State:
         for i in range(3):
             if self.grid[i][0] == self.grid[i][1] == self.grid[i][2] != " ":
                 value = MatchValue(self.grid[i][0])
+                break
             if self.grid[0][i] == self.grid[1][i] == self.grid[2][i] != " ":
                 value = MatchValue(self.grid[0][i])
+                break
         if self.grid[0][0] == self.grid[1][1] == self.grid[2][2] != " ":
             value = MatchValue(self.grid[0][0])
         if self.grid[0][2] == self.grid[1][1] == self.grid[2][0] != " ":
@@ -65,31 +70,26 @@ class State:
         
         # recursively scan every possible move until all ends are found,
         # find best move
-        print("Moves Analysed: {}\r".format(State.TotalStatesExplored), end="")
-        State.TotalStatesExplored += 1
         
         # break out if game is over
-        if self.value != 0 or self.IsGameOver():
+        if self.IsGameOver():
             return self.value
         
-        # Prevent infinite looping
-        if self.failsafe > 9:
-            raise Exception("Somewhere be loopin too much cuz we got more than 9 layers.\nHeres the state:\n" + str(self))
         # find each empty square and create a new state associated to it
         for y, row in enumerate(self.grid):
             for x, square in enumerate(row):
                 if square == " ":
-                    new = State(self.grid)
-                    new.failsafe = self.failsafe + 1
-                    new.grid[y][x] = "X" if self.playermove == 1 else "O"
-                    new.playermove=self.playermove*-1
-                    new.value = new.getStateValue() 
-                    new.GenerateID()              
+                    print("Moves Analysed: {}\r".format(State.TotalStatesExplored), end="")
+                    State.TotalStatesExplored += 1
+                    grid = deepcopy(self.grid)
+                    grid[y][x] = "X" if self.playermove == 1 else "O"
+                    new = State(grid, FirstMove=self.playermove*-1, failsafe=self.failsafe+1)
+                    new.value = new.calculate()
                     self.moves.append(new) 
         if len(self.moves) == 0:
             return self.getStateValue()
         # Find value of all child moves
-        values = [state.calculate() for state in self.moves]
+        values = [state.value for state in self.moves]
         
         # add a tiebreaking weight to favour moves which set up for a win.
         self.WinningFinalStates += sum(move.WinningFinalStates for move in self.moves)
@@ -103,8 +103,8 @@ class State:
         return self.value
     def IsGameOver(self):
         gridfilled = all(square != " " for row in self.grid for square in row)
-        gameover = self.getStateValue() != 0
-        return gridfilled or gameover
+        self.value = self.getStateValue()
+        return gridfilled or self.value != 0 # return True if no moves left or winning move.
     def FindMove(self):
         # Can only be used after changing a square in self.grid .
         # Returns the calculated state that corresponds with 
@@ -136,7 +136,7 @@ def main(playermove):
              [" "," "," "]]
     if playermove == 1:
         start[randint(0,2)][randint(0,2)] = "X"
-    grid = State(start, playermove=-1)
+    grid = State(start, FirstMove=-1)
     grid.calculate()
     print("Ready!{}\n".format(' '*30))
     sleep(0.5)
@@ -186,8 +186,10 @@ def main(playermove):
     for i in range(3):
         if grid.grid[i][0] == grid.grid[i][1] == grid.grid[i][2] != " ":
             grid.grid[i][0] = grid.grid[i][1] = grid.grid[i][2] = "█"
+            break
         if grid.grid[0][i] == grid.grid[1][i] == grid.grid[2][i] != " ":
             grid.grid[0][i] = grid.grid[1][i] = grid.grid[2][i] = "█"
+            break
     if grid.grid[0][0] == grid.grid[1][1] == grid.grid[2][2] != " ":
         grid.grid[0][0] = grid.grid[1][1] = grid.grid[2][2] = "█"
     if grid.grid[0][2] == grid.grid[1][1] == grid.grid[2][0] != " ":
