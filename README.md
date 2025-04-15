@@ -7,7 +7,7 @@ The bot will automatically play after the player's move.
 
 ## Instructions
 - run `python3 tic-tac-toe.py` in your command line.
-- enter moves following the format `[column];[row]` considering 1;1 to be the top left square.
+- enter moves following `[column];[row]` considering 1;1 to be the top left square and 3;3 the bottom right.
 - to **end the current game**, use a Keyboard Interrupt `ctrl + c` 
 - to **terminate the entire program**, type "end" when prompted for a move.
 
