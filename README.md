@@ -15,4 +15,5 @@ The bot will automatically play after the player's move.
 ### Optimization
 - Alpha-Beta pruning
 ### Quality of Life (QoL)
+- Auto-move for garanteed ties
 - Clicking boxes instead of typing moves (TBD)
