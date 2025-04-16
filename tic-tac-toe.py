@@ -77,7 +77,7 @@ class State:
         for y, row in enumerate(self.grid):
             for x, square in enumerate(row):
                 if square == " ":
-                    print("Moves Analysed: {}\r".format(State.TotalStatesExplored), end="")
+                    print("\rCalculating... [ {} ]\r".format("░"*round(State.TotalStatesExplored/200)), end="")
                     State.TotalStatesExplored += 1
                     grid = deepcopy(self.grid)
                     grid[y][x] = "X" if self.playermove == 1 else "O"
@@ -137,8 +137,9 @@ def main(playermove):
         start[randint(0,2)][randint(0,2)] = "X"
     grid = State(start, FirstMove=-1)
     grid.calculate()
-    print("Ready!{}\n".format(' '*30))
-    sleep(0.5)
+    print("Ready!         [ {} ]".format('▓'*round(State.TotalStatesExplored/200)), end = "\r")
+    sleep(1)
+    print(' '*(19+round(State.TotalStatesExplored/200)), end = "\n\n")
     playermove = -1
     spaces = 2 # Spacing for formatting
     # game loop
@@ -178,7 +179,7 @@ def main(playermove):
                         return grid
                     break
                 else: 
-                    print("\x1b[1BInvalid move. Please try again.\r\x1b[1A",end="")
+                    print("\x1b[1BInvalid move. Please try again.\r\x1b[1A",end="", flush=True)
         else:
             grid = grid.bestmove
         print("\n") 
@@ -198,7 +199,7 @@ def main(playermove):
         grid.grid[0][2] = grid.grid[1][1] = grid.grid[2][0] = "█"
     print("{}\n{} wins.".format(str(grid),("No player","X","O")[grid.value]))
     sleep(1)
-    print("\x1b[7A" + (" "*54+"\n")*7 + "\x1b[8A")
+    print("\x1b[7A" + (" "*54+"\n")*7 + "\x1b[7A", end = "", flush=True)
     return 0
 
 # ======================================================================================================== #
@@ -228,8 +229,10 @@ if __name__ == "__main__":
                 fp.write("{}\nBot was unsuccessful in calculating the following move:\n{}\nPlayermove: {}\nFound in cache? {}\nCalculated moves:".format(asctime(localtime()),str(returned),returned.playermove,returned.GenerateID() in State.StatesExploredID))
                 fp.writelines(["\n\n" + str(move) for move in returned.moves])
                 fp.write("="*60+"\n")
+            
+            print("Logging successful. Exiting in 3...", end = "")
             for i in range(3):
-                print("Logging successful. Exiting in {}...".format(3-i), end="\n\x1b[1A")
+                print("\x1b[4D{}...".format(3-i), end="", flush=True)
                 sleep(1)
             print(end="\r\x1b[1A")
             quit()
