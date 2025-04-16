@@ -33,8 +33,6 @@ class State:
         self.bestmove = None
         self.ID = None
         self.GenerateID()
-
-        # calculate who's move it is by counting the number of Xs and Os.
         self.playermove = FirstMove      
     def __str__(self):
         return "\n".join([" ".join("".join(["[{}]".format(square) for square in row])) for row in self.grid])+"\n"
@@ -59,6 +57,9 @@ class State:
             value = MatchValue(self.grid[0][2])
         return value
     def calculate(self):
+        # recursively scan every possible move until all ends are found,
+        # then find best move
+
         # Ensure this move has not already been checked.
         if self.GenerateID() in State.StatesExploredID:
             Location = State.StatesExploredID.index(self.ID)
@@ -67,9 +68,6 @@ class State:
         else:
             State.StatesExploredID.append(self.ID)
             State.StatesExplored.append(self)
-        
-        # recursively scan every possible move until all ends are found,
-        # find best move
         
         # break out if game is over
         if self.IsGameOver():
@@ -86,7 +84,8 @@ class State:
                     new = State(grid, FirstMove=self.playermove*-1, failsafe=self.failsafe+1)
                     new.value = new.calculate()
                     self.moves.append(new) 
-        if len(self.moves) == 0:
+        # if self.moves is empty, exit the function.
+        if not self.moves:
             return self.getStateValue()
         # Find value of all child moves
         values = [state.value for state in self.moves]
@@ -154,20 +153,23 @@ def main(playermove):
                 spaces = len(move)     
                 # validation 
                 try:
-                    if len(move) != 3 or (len(move) > 1 and move[1] != ";"):
-                        raise IndexError()
-                    move = move.split(";")
-                    x,y = int(move[0]) - 1, int(move[1]) - 1
-                    if not (-1 < x < 3 and -1 < y < 3):
-                        raise ValueError()
+                    if move != "":
+                        if len(move) != 3 or (len(move) > 1 and move[1] != ";"):
+                            raise IndexError()
+                        move = move.split(";")
+                        x,y = int(move[0]) - 1, int(move[1]) - 1
+                        if not (-1 < x < 3 and -1 < y < 3):
+                            raise ValueError()
                 except ValueError:
-                    print("Invalid input. Please try again.                                         \r\x1b[2A")
+                    print("Invalid input. Please try again.                      \r\x1b[2A")
                     continue
                 except IndexError:
                     print("Invalid input format. Example: 3;2 for column 3 row 2.\r\x1b[2A")
                     continue
                 else:
-                    print(" "*73+"\r\x1b[1A",end="")
+                    print(" "*59+"\r\x1b[1A",end="")
+                if move == "":
+                    x,y = choice([(x,y) for y in range(3) for x in range(3) if grid.grid[y][x] == " "])
                 if grid.grid[y][x] == " ":
                     grid.grid[y][x] = "O"
                     try:
