@@ -74,6 +74,7 @@ class State:
             return self.value
         
         # find each empty square and create a new state associated to it
+        end = False
         for y, row in enumerate(self.grid):
             for x, square in enumerate(row):
                 if square == " ":
@@ -85,6 +86,11 @@ class State:
                     new = State(grid, FirstMove=self.playermove*-1, failsafe=self.failsafe+1)
                     new.value = new.calculate()
                     self.moves.append(new) 
+                    if new.value == self.playermove:
+                        end = True
+                        break
+            if end:
+                break
         # if self.moves is empty, exit the function.
         if not self.moves:
             return self.getStateValue()
