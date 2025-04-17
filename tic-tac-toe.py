@@ -9,11 +9,6 @@ from random import randint, choice
 class NewGame(Exception): pass
     
 class State:
-    TotalStatesExplored = 0
-    # Create a cache to ensure no duplicate values are stored 
-    StatesExploredID = []
-    StatesExplored = []
-
     def __init__(self, *args, FirstMove = 1, failsafe = 0):
         # Prevent infinite looping by checking the failsafe when a new state is created
         if failsafe > 9:
@@ -36,6 +31,7 @@ class State:
         self.playermove = FirstMove      
     def __str__(self):
         return "\n".join([" ".join("".join(["[{}]".format(square) for square in row])) for row in self.grid])+"\n"
+    @property
     def getStateValue(self):
         value = 0
         def MatchValue(square):
@@ -93,7 +89,7 @@ class State:
                 break
         # if self.moves is empty, exit the function.
         if not self.moves:
-            return self.getStateValue()
+            return self.getStateValue
         # Find value of all child moves
         values = [state.value for state in self.moves]
         
@@ -109,7 +105,7 @@ class State:
         return self.value
     def IsGameOver(self):
         gridfilled = all(square != " " for row in self.grid for square in row)
-        self.value = self.getStateValue()
+        self.value = self.getStateValue
         return gridfilled or self.value != 0 # return True if no moves left or winning move.
     def FindMove(self):
         # Can only be used after changing a square in self.grid .
@@ -123,15 +119,21 @@ class State:
     def GenerateID(self):
         self.ID = "".join("".join([square for square in row]) for row in self.grid)
         return self.ID
+    @staticmethod
     def ResetCache():
         State.TotalStatesExplored = 0
         State.StatesExploredID = []
         State.StatesExplored = []
-    #@staticmethod
+    @staticmethod
     def icons():
         while True:
             for i in range(4):
                 yield ("/","-","\\","|")[i]
+    TotalStatesExplored = 0
+    # Create a cache to ensure no duplicate values are stored.
+    StatesExploredID = []
+    StatesExplored = []
+    # Assign the generator for later use.
     IconGenerator = icons()          
 
 # ======================================================================================================== #
@@ -228,7 +230,7 @@ if __name__ == "__main__":
             returned = main(playermove)
             State.ResetCache()
         except NewGame:
-            print(end="\x1b[1A"+57*" " + "\r")
+            print(end="\r"+57*" " + "\r\x1b[1A"+32*" " + "\r")
             playermove *= -1
             State.ResetCache()
             continue
