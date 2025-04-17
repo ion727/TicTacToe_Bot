@@ -75,7 +75,7 @@ class State:
             for x, square in enumerate(row):
                 if square == " ":
                     if round(State.TotalStatesExplored) % 2000 == 0:    
-                        print("\x1b[1ACalculating... ({})".format(next(State.IconGenerator)), flush=True)
+                        print("Calculating... ({})".format(next(State.IconGenerator)), end="\r", flush=True)
                     State.TotalStatesExplored += 1
                     grid = deepcopy(self.grid)
                     grid[y][x] = "X" if self.playermove == 1 else "O"
@@ -143,9 +143,9 @@ class State:
 # ======================================================================================================== #
 
 def main(playermove):
-    print()
+
     if playermove not in (1,-1):
-        raise ValueError("main() takes one positional argument; playermove must be 1 or -1")
+        raise ValueError("main() takes one positional argument; either 1 or -1")
     start = [[" "," "," "],
              [" "," "," "],
              [" "," "," "]]
@@ -153,7 +153,7 @@ def main(playermove):
         start[randint(0,2)][randint(0,2)] = "X"
     grid = State(start, FirstMove=-1)
     grid.calculate()
-    print("\x1b[1AReady!             \n")
+    print("\rReady!             \n")
     sleep(1)
     playermove = -1
     spaces = 2 # Spacing for formatting
@@ -166,6 +166,8 @@ def main(playermove):
                 move = input("Enter a move (Format: X;Y): {}".format(' '*spaces+'\x1b[1D'*spaces))
                 if move == "new":
                     raise NewGame()
+                elif move == "end":
+                    raise KeyboardInterrupt()
                 spaces = len(move)     
                 # validation 
                 try:
@@ -177,13 +179,13 @@ def main(playermove):
                         if not (-1 < x < 3 and -1 < y < 3):
                             raise ValueError()
                 except ValueError:
-                    print("Invalid input. Please try again.                      \r\x1b[2A")
+                    print("Invalid input. Please try again.                      ", end="\r\x1b[1A", flush=True)
                     continue
                 except IndexError:
-                    print("Invalid input format. Example: 3;2 for column 3 row 2.\r\x1b[2A")
+                    print("Invalid input format. Example: 3;2 for column 3 row 2.", end="\r\x1b[1A", flush=True)
                     continue
                 else:
-                    print(" "*59+"\r\x1b[1A",end="")
+                    print(" "*59,end="\r\x1b[1A", flush=True)
                 if move == "":
                     x,y = choice([(x,y) for y in range(3) for x in range(3) if grid.grid[y][x] == " "])
                 if grid.grid[y][x] == " ":
@@ -194,7 +196,7 @@ def main(playermove):
                         return grid
                     break
                 else: 
-                    print("\x1b[1BInvalid move. Please try again.\r\x1b[1A",end="", flush=True)
+                    print("\x1b[1BInvalid move. Please try again.",end="\r\x1b[1A", flush=True)
         else:
             grid = grid.bestmove
         print("\n") 
@@ -213,7 +215,7 @@ def main(playermove):
     if grid.grid[0][2] == grid.grid[1][1] == grid.grid[2][0] != " ":
         grid.grid[0][2] = grid.grid[1][1] = grid.grid[2][0] = "█"
     inp = input("{}\n{} wins. Press enter to continue.\n".format(str(grid),("No player","X","O")[grid.value]))
-    print("\x1b[8A" + (" "*54+"\n")*7 + " "*len(inp)+"\n" + "\x1b[8A", end = "", flush=True)
+    print("\x1b[8A" + (" "*54+"\n")*7 + " "*len(inp), end = "\x1b[7A", flush=True)
     return 0
 
 # ======================================================================================================== #

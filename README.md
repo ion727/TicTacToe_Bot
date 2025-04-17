@@ -9,9 +9,9 @@ The bot will automatically play after the player's move.
 - run `python3 tic-tac-toe.py` in your command line.
 - enter moves following `[column];[row]` considering 1;1 to be the top left square and 3;3 the bottom right.
 - the `Enter` key can be pressed instead of a move to play a random move.
+    - **NOTE: RAPIDLY PRESSING THE ENTER KEY WITHOUT AWAITING MOVE UPDATE MAY BREAK THE DISPLAY.**
 - to **end the current game**, type `new` when prompted for a move.
-    - **NOTE: RAPIDLY PRESSING THE ENTER KEY WITHOUT AWAITING MOVE UPDATE WILL BREAK THE DISPLAY.**
-- to **terminate the entire program**, use a Keyboard Interrupt `ctrl + c`.
+- to **terminate the entire program**, use a Keyboard Interrupt `ctrl + c` or enter `new`.
 
 ## Coming Soon (Well, eventually I guess)
 ### Optimization
