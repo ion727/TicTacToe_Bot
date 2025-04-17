@@ -6,7 +6,7 @@ from time import sleep, asctime, localtime
 from copy import deepcopy
 from random import randint, choice
 
-class TerminateProgram(Exception): pass
+class NewGame(Exception): pass
     
 class State:
     TotalStatesExplored = 0
@@ -162,8 +162,8 @@ def main(playermove):
             # Loop till valid move inputted
             while True:
                 move = input("Enter a move (Format: X;Y): {}".format(' '*spaces+'\x1b[1D'*spaces))
-                if move == "end":
-                    raise TerminateProgram()
+                if move == "new":
+                    raise NewGame()
                 spaces = len(move)     
                 # validation 
                 try:
@@ -227,12 +227,12 @@ if __name__ == "__main__":
         try:
             returned = main(playermove)
             State.ResetCache()
-        except KeyboardInterrupt:
-            print(end="\r"+57*" " + "\r")
+        except NewGame:
+            print(end="\x1b[1A"+57*" " + "\r")
             playermove *= -1
             State.ResetCache()
             continue
-        except TerminateProgram:
+        except KeyboardInterrupt:
             print(end="\x1b[1A")
             break
         if returned != 0:
