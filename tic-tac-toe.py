@@ -15,6 +15,9 @@ class State:
     StatesExplored = []
 
     def __init__(self, *args, FirstMove = 1, failsafe = 0):
+        # Prevent infinite looping by checking the failsafe when a new state is created
+        if failsafe > 9:
+            raise Exception("Somewhere be loopin too much cuz we got more than 9 layers.\nHeres the state:\n" + str(self))
         if len(args) == 1:
             args = args[0]
         if len(args) == 9:
@@ -24,9 +27,6 @@ class State:
         else:
             self.grid = [[" " for _ in range(3)] for _ in range(3)]
         self.failsafe = failsafe # to ensure infinite looping is impossible
-        # Prevent infinite looping by checking the failsafe when a new state is created
-        if self.failsafe > 9:
-            raise Exception("Somewhere be loopin too much cuz we got more than 9 layers.\nHeres the state:\n" + str(self))
         self.value = 0
         self.moves = []
         self.WinningFinalStates = 0
