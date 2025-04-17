@@ -1,4 +1,8 @@
 '''
+Author: ion727
+Date of completition: April 17th 2025
+
+
 arbitraty decisions: the bot will play X, the player will play O. X will be considered 1 and O will be -1.
 X will move first.
 '''

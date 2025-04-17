@@ -5,6 +5,13 @@ This program uses ASCII-art to display a tic-tac-toe board, wherein the player t
 
 The bot will automatically play after the player's move.
 
+## Author: ion727
+
+A fun little project to learn about the minimax algorithm and basic optimisation.
+
+Note: this project is completed for now, I doubt I'll come back to it.
+
+
 ## Instructions
 - run `python3 tic-tac-toe.py` in your command line.
 - enter moves following `[column];[row]` considering 1;1 to be the top left square and 3;3 the bottom right.
@@ -13,9 +20,13 @@ The bot will automatically play after the player's move.
 - to **end the current game**, type `new` when prompted for a move.
 - to **terminate the entire program**, use a Keyboard Interrupt `ctrl + c` or enter `new`.
 
-## Coming Soon (Well, eventually I guess)
-### Optimization
-- Alpha-Beta pruning
-### Quality of Life (QoL)
-- Auto-move for garanteed ties
-- Clicking boxes instead of typing moves (TBD)
+## Special thanks
+### Mechanics' suggestions
+- **[@isabella-onder](https://github.com/isabella-onder)** : Autoplay.
+- **Felix T.** : Randomising bot's first move.
+
+### Playtesting
+- **Felix T.** & **Kurt M.** : Keybinds & input Validation.
+- **Mattia U.** : Beat the bot by crashing into a winning state.
+- **Margherita S.** : (totally intentionally) reaching every single losing position.
+- and many more who found creative ways to disect and break the game in far too many ways.
