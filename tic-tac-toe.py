@@ -77,7 +77,8 @@ class State:
         for y, row in enumerate(self.grid):
             for x, square in enumerate(row):
                 if square == " ":
-                    print("\rCalculating... [ {} ]\r".format("░"*round(State.TotalStatesExplored/200)), end="")
+                    if round(State.TotalStatesExplored) % 2000 == 0:    
+                        print("\x1b[1ACalculating... ({})".format(next(State.IconGenerator)), flush=True)
                     State.TotalStatesExplored += 1
                     grid = deepcopy(self.grid)
                     grid[y][x] = "X" if self.playermove == 1 else "O"
@@ -120,6 +121,12 @@ class State:
         State.TotalStatesExplored = 0
         State.StatesExploredID = []
         State.StatesExplored = []
+    #@staticmethod
+    def icons():
+        while True:
+            for i in range(4):
+                yield ("/","-","\\","|")[i]
+    IconGenerator = icons()          
 
 # ======================================================================================================== #
 # ======================================================================================================== #
@@ -128,6 +135,7 @@ class State:
 # ======================================================================================================== #
 
 def main(playermove):
+    print()
     if playermove not in (1,-1):
         raise ValueError("main() takes one positional argument; playermove must be 1 or -1")
     start = [[" "," "," "],
@@ -137,9 +145,8 @@ def main(playermove):
         start[randint(0,2)][randint(0,2)] = "X"
     grid = State(start, FirstMove=-1)
     grid.calculate()
-    print("Ready!         [ {} ]".format('▓'*round(State.TotalStatesExplored/200)), end = "\r")
+    print("\x1b[1AReady!             \n")
     sleep(1)
-    print(' '*(19+round(State.TotalStatesExplored/200)), end = "\n\n")
     playermove = -1
     spaces = 2 # Spacing for formatting
     # game loop
