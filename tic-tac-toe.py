@@ -197,7 +197,7 @@ def main(playermove):
             grid = grid.bestmove
         print("\n") 
         playermove *= -1
-        sleep(0.5)
+        sleep(0.05)
 
     for i in range(3):
         if grid.grid[i][0] == grid.grid[i][1] == grid.grid[i][2] != " ":
@@ -210,9 +210,8 @@ def main(playermove):
         grid.grid[0][0] = grid.grid[1][1] = grid.grid[2][2] = "█"
     if grid.grid[0][2] == grid.grid[1][1] == grid.grid[2][0] != " ":
         grid.grid[0][2] = grid.grid[1][1] = grid.grid[2][0] = "█"
-    print("{}\n{} wins.".format(str(grid),("No player","X","O")[grid.value]))
-    sleep(1)
-    print("\x1b[7A" + (" "*54+"\n")*7 + "\x1b[7A", end = "", flush=True)
+    inp = input("{}\n{} wins. Press enter to continue.\n".format(str(grid),("No player","X","O")[grid.value]))
+    print("\x1b[8A" + (" "*54+"\n")*7 + " "*len(inp)+"\n" + "\x1b[8A", end = "", flush=True)
     return 0
 
 # ======================================================================================================== #
